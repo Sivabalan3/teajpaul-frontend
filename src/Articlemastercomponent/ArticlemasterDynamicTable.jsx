@@ -1,0 +1,143 @@
+import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getArticleTypes } from "../store/Articlemaster/ArticlemasterSlice";
+import Handsontable from 'handsontable';
+import 'handsontable/dist/handsontable.full.css';
+import { HotTable } from '@handsontable/react';
+import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
+
+const ArticlemasterDynamicTable = forwardRef(({ Articletype }, ref) => {
+  const [isEditable, setIsEditable] = useState(false);
+  const dispatch = useDispatch();
+  const { data: ArticleData, loading, error } = useSelector((state) => state.articlemaster.getArticleTypes);
+  const hotTableComponent = useRef(null);
+
+  useEffect(() => {
+    if (Articletype) {
+      dispatch(getArticleTypes({ articleType: Articletype }));
+    }
+  }, [dispatch, Articletype]);
+
+  useImperativeHandle(ref, () => ({
+    handleEnableEdit: () => {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to enable editing?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, enable it!",
+        cancelButtonText: "No, keep it read-only",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setIsEditable(true);
+          Swal.fire("Editing Enabled!", "You can now edit the table.", "success");
+        }
+      });
+    },
+    handleExportData: () => {
+      const hotInstance = hotTableComponent.current.hotInstance;
+      const data = hotInstance.getData();
+      const headers = hotInstance.getColHeader();
+      const dataWithHeaders = [headers, ...data];
+      const ws = XLSX.utils.aoa_to_sheet(dataWithHeaders);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+      XLSX.writeFile(wb, "spar_article.xlsx");
+    }
+  }));
+
+  useEffect(() => {
+    if (ArticleData.length && hotTableComponent.current) {
+      const headers = Object.keys(ArticleData[0]).filter(
+        (header) => header !== "_id" && header !== "__v"
+      );
+      const columns = headers.map((header) => ({
+        data: header,
+        title: header,
+        readOnly: !isEditable,
+      }));
+
+      hotTableComponent.current.hotInstance.updateSettings({
+        data: ArticleData.map((row) => {
+          const { _id, __v, ...filteredRow } = row;
+          return filteredRow;
+        }),
+        colHeaders: headers,
+        colWidths: 100,
+        rowHeights: 30,
+        columns: columns,
+        dropdownMenu: true,
+        contextMenu: {
+          items: {
+            row_above: { name: "Insert row above" },
+            row_below: { name: "Insert row below" },
+            col_left: { name: "Insert column left" },
+            col_right: { name: "Insert column right" },
+            remove_row: { name: "Remove row" },
+            remove_col: { name: "Remove column" },
+            undo: { name: "Undo" },
+            redo: { name: "Redo" },
+            make_read_only: { name: "Read only" },
+            alignment: { name: "Alignment" },
+          },
+        },
+        filters: true,
+        columnSorting: true,
+      });
+    }
+  }, [ArticleData, isEditable]);
+  if (loading)
+    return (
+      <div className="w-full gap-x-2 flex justify-center items-center h-screen my-auto justify-center">
+        <div className="w-5 bg-[#d991c2] animate-pulse h-5 rounded-full animate-bounce"></div>
+        <div className="w-5 animate-pulse h-5 bg-[#9869b8] rounded-full animate-bounce"></div>
+        <div className="w-5 h-5 animate-pulse bg-[#6756cc] rounded-full animate-bounce"></div>
+      </div>
+    );
+
+  if (error) return <p>Error: {error}</p>;
+  if (!Articletype || (Articletype !== "D-mart" && Articletype !== "Spaar")) {
+    return (
+      <section class="flex items-center h-screen p-16 bg-gray-50 dark:bg-gray-700">
+    <div class="container flex flex-col items-center ">
+        <div class="flex flex-col gap-6 max-w-md text-center">
+            <h2 class="font-extrabold text-9xl text-gray-600 dark:text-gray-100">
+                <span class="sr-only">Error</span>404
+            </h2>
+            <p class="text-2xl md:text-3xl dark:text-gray-300">Please select valid Article File</p>
+           
+        </div>
+    </div>
+</section>
+    );
+  }
+  return (
+    <>
+     
+      <HotTable
+        ref={hotTableComponent}
+        settings={{
+          data: ArticleData.map((row) => {
+            const { _id, __v, ...filteredRow } = row;
+            return filteredRow;
+          }),
+          colHeaders: true,
+          rowHeaders: true,
+          stretchH: "all",
+          className: "custom-table",
+          dropdownMenu: true,
+          contextMenu: true,
+          filters: true,
+          columnSorting: true,
+          width: "100%",
+          height: "80vh",
+          licenseKey: "non-commercial-and-evaluation",
+        }}
+        style={{ width: "100%" }}
+      />
+    </>
+  );
+});
+
+export default ArticlemasterDynamicTable;
