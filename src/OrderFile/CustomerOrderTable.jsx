@@ -191,7 +191,7 @@ const CustomerArticleTable = () => {
           filters: true,
           columnSorting: true,
           width: "100%",
-          // height: "80vh",
+          height: "60vh",
           licenseKey: "non-commercial-and-evaluation",
         }}
         style={{ width: "100%" }}

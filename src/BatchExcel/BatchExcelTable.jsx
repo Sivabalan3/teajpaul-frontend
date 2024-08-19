@@ -4,7 +4,10 @@ import Handsontable from "handsontable";
 import "handsontable/dist/handsontable.full.css";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
-import { batchFetchExcelData, DeleteBatchExcelFile } from "../store/batchexcelfile/batchExcelFileSlice";
+import {
+  batchFetchExcelData,
+  DeleteBatchExcelFile,
+} from "../store/batchexcelfile/batchExcelFileSlice";
 import { useDispatch, useSelector } from "react-redux";
 import BatchuploadFile from "./BatchuploadFile";
 import axios from "axios";
