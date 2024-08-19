@@ -12,7 +12,7 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [articleType, setArticleType] = useState("");
   const [uploadInterval, setUploadInterval] = useState(null);
-
+  const [isUploading, setIsUploading] = useState(false);
   useEffect(() => {
     if (!isOpen) {
       resetForm();
@@ -67,7 +67,9 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
         confirmButtonText: "OK",
       });
       return;
+      
     }
+    setIsUploading(true);
     dispatch(postorderFilewithArticleType({ file, articleType }))
       .unwrap()
       .then((result) => {
@@ -89,6 +91,9 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
           icon: "error",
           confirmButtonText: "OK",
         });
+      })
+      .finally(() => {
+        setIsUploading(false); // Re-enable the button
       });
   };
 
@@ -104,6 +109,7 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
     setFile(null);
     setUploadProgress(0);
     setArticleType("");
+    setIsUploading(false);
   };
 
   return (
@@ -264,9 +270,14 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
 
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                  disabled={isUploading} // Disable the button when uploading
+                  className={`${
+                    isUploading
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  } text-white px-6 py-2 rounded-lg`}
                 >
-                  Upload File
+                  {isUploading ? "Uploading..." : "Upload File"}
                 </button>
               </div>
             </form>
