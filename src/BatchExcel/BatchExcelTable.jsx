@@ -33,7 +33,14 @@ const BatchExcelTable = () => {
         const { _id, __v, ...filteredRow } = row;
         return filteredRow;
       });
+      // const filteredAndSortedData = data
+      // .map((row) => {
+      //   const { _id, __v, ...filteredRow } = row;
+      //   return filteredRow;
+      // })
+      // .sort((a, b) => b.UOM1_Qty - a.UOM1_Qty) //UOM1_QTY DESCENDING ORDER VALUE
       setBatchData(filteredData);
+      // setBatchData(filteredAndSortedData);
     }
   }, [data]);
 
