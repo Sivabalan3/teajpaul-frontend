@@ -42,6 +42,18 @@ function Navbar() {
       </li>
       <li>
         <NavLink
+          to="/qutation"
+          className={({ isActive }) =>
+            isActive
+              ? "flex justify-center border-b-4 border-indigo-600 text-indigo-600 py-4"
+              : "flex justify-center border-b-4 border-transparent hover:text-indigo-600 hover:border-indigo-600 py-4"
+          }
+        >
+          Qutation File
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
           to="/customer-order"
           className={({ isActive }) =>
             isActive

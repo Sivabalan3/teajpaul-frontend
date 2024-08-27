@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
-import {
-  getCustomerExcelData,
-  postorderFilewithArticleType,
-} from "../store/customerOrder/customerOrderSlice";
+import {qutationupload,fetchQutationsByType} from "../store/Qutationfile/QutationSlice"
 
-function CustomerArticleExcelUpload({ isOpen, closeModal }) {
+function QuotationUploadfile({ isOpen, closeModal }) {
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [articleType, setArticleType] = useState("");
+  const [QutationType, setQutationType] = useState("");
   const [uploadInterval, setUploadInterval] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+
   useEffect(() => {
     if (!isOpen) {
       resetForm();
@@ -51,15 +49,22 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    // Add visual feedback during drag-over
+    e.currentTarget.style.borderColor = "#4A90E2";
   };
 
-  const handleArticleTypeChange = (e) => {
-    setArticleType(e.target.value);
+  const handleDragLeave = (e) => {
+    // Remove visual feedback after drag-over
+    e.currentTarget.style.borderColor = "#ccc";
+  };
+
+  const handleQutationTypeChange = (e) => {
+    setQutationType(e.target.value);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!file || !articleType) {
+    if (!file || !QutationType) {
       Swal.fire({
         title: "Warning",
         text: "Please select a file and article type.",
@@ -67,10 +72,9 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
         confirmButtonText: "OK",
       });
       return;
-      
     }
     setIsUploading(true);
-    dispatch(postorderFilewithArticleType({ file, articleType }))
+    dispatch(qutationupload({ file, QutationType }))
       .unwrap()
       .then((result) => {
         Swal.fire({
@@ -81,7 +85,7 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
         }).then(() => {
           closeModal();
           resetForm();
-          dispatch(getCustomerExcelData());
+          dispatch(fetchQutationsByType());
         });
       })
       .catch((error) => {
@@ -93,7 +97,7 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
         });
       })
       .finally(() => {
-        setIsUploading(false); 
+        setIsUploading(false);
       });
   };
 
@@ -108,18 +112,18 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
   const resetForm = () => {
     setFile(null);
     setUploadProgress(0);
-    setArticleType("");
+    setQutationType("");
     setIsUploading(false);
   };
 
   return (
     <>
-      {isOpen && (
+     {isOpen && (
         <div className="fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full z-[1000] before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]">
           <div className="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
             <div className="flex items-center pb-3 border-b border-gray-200">
               <div className="flex-1">
-                <h3 className="text-gray-800 text-xl font-bold">Upload File</h3>
+                <h3 className="text-gray-800 text-xl font-bold">Upload Qutation File</h3>
                 <p className="text-gray-600 text-xs mt-1">
                   Upload file to this project
                 </p>
@@ -143,20 +147,20 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
 
             <form onSubmit={handleSubmit} className="max-w-sm mx-auto">
               <label
-                htmlFor="articleType"
+                htmlFor="QutationType"
                 className="block mb-2 text-sm font-medium text-gray-900"
               >
                 Select an option
               </label>
               <select
-                id="articleType"
-                value={articleType}
-                onChange={handleArticleTypeChange}
+                id="QutationType"
+                value={QutationType}
+                onChange={handleQutationTypeChange}
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               >
                 <option value="">Choose an Article</option>
-                <option value="D-mart">D-mart</option>
-                <option value="Spaar">Spaar</option>
+                <option value="D-martqutation">D-mart Qutation</option>
+                <option value="SPAR-qutation">Spaar Qutation</option>
                 <option value="C">Option C</option>
                 <option value="D">Option D</option>
               </select>
@@ -288,4 +292,4 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
   );
 }
 
-export default CustomerArticleExcelUpload;
+export default QuotationUploadfile;
