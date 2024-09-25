@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ArticleUploadFile from "./ArticleUploadFile";
 import ArticlemasterDynamicTable from "./ArticlemasterDynamicTable";
 import { useDispatch } from "react-redux";
@@ -9,6 +9,10 @@ function ArticleMasterIndex() {
   const [Articletype, setArticleType] = useState("D-mart");
   const dispatch = useDispatch();
   const tableRef = useRef(null);
+
+  useEffect(() => {
+    dispatch(getArticleTypes());
+  }, [dispatch]);
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
@@ -24,6 +28,10 @@ function ArticleMasterIndex() {
 
   const handleExportData = () => {
     tableRef.current.handleExportData();
+  };
+
+  const handleDeleteData = () => {
+    tableRef.current.handleDeleteData();
   };
 
   return (
@@ -49,7 +57,10 @@ function ArticleMasterIndex() {
           >
             Export
           </button>
-          <button className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+          <button
+            onClick={handleDeleteData}
+            className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+          >
             Delete
           </button>
         </div>

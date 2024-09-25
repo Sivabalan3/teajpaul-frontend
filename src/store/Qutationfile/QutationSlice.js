@@ -30,18 +30,28 @@ export const qutationupload = createAsyncThunk(
 // Define the async thunk for fetching quotations
 export const fetchQutationsByType = createAsyncThunk(
     'Qutation/fetchQutationsByType',
-    async ({QutationType}, { rejectWithValue }) => {
-      try {
-        // Ensure QutationType is a string
-        const response = await axios.get(`${Base_Url}/api/excel/qutation/${QutationType}`);
-
-        return response.data;
-      } catch (error) {
-        return rejectWithValue(error.response ? error.response.data : error.message);
-      }
+    async ({ QutationType }, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${Base_Url}/api/excel/qutation/${QutationType}`);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response ? error.response.data : error.message);
+        }
     }
-  );
-  
+);
+
+// Define the async thunk for deleting all quotations
+export const deleteAllQuotations = createAsyncThunk(
+    'Qutation/deleteAllQuotations',
+    async ({ QutationType }, { rejectWithValue }) => {
+        try {
+            const response = await axios.delete(`${Base_Url}/api/excel/qutation/delete/all`);
+            return response.data; // Assuming the response contains a message
+        } catch (error) {
+            return rejectWithValue(error.response ? error.response.data : error.message);
+        }
+    }
+);
 
 // Create the slice
 const QutationSlices = createSlice({
@@ -52,7 +62,7 @@ const QutationSlices = createSlice({
             loading: false,
             error: null,
         },
-        fetchedQutations: {  // Added state for fetched quotations
+        fetchedQutations: {
             data: [],
             loading: false,
             error: null,
@@ -60,8 +70,8 @@ const QutationSlices = createSlice({
     },
     reducers: {},
     extraReducers: (builder) => {
+        // Handle states for uploading quotations
         builder
-            // Handle states for uploading quotations
             .addCase(qutationupload.pending, (state) => {
                 state.qutationupload.loading = true;
                 state.qutationupload.error = null;
@@ -102,6 +112,32 @@ const QutationSlices = createSlice({
                 Swal.fire({
                     title: "Error",
                     text: action.payload || "Error fetching quotations",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+            })
+
+            // Handle states for deleting all quotations
+            .addCase(deleteAllQuotations.pending, (state) => {
+                state.fetchedQutations.loading = true;
+                state.fetchedQutations.error = null;
+            })
+            .addCase(deleteAllQuotations.fulfilled, (state, action) => {
+                state.fetchedQutations.loading = false;
+                state.fetchedQutations.data = []; // Clear the quotations data
+                Swal.fire({
+                    title: "Deleted",
+                    text: action.payload.message || "All quotations have been deleted successfully!",
+                    icon: "success",
+                    confirmButtonText: "OK",
+                });
+            })
+            .addCase(deleteAllQuotations.rejected, (state, action) => {
+                state.fetchedQutations.loading = false;
+                state.fetchedQutations.error = action.payload;
+                Swal.fire({
+                    title: "Error",
+                    text: action.payload || "Error deleting quotations",
                     icon: "error",
                     confirmButtonText: "OK",
                 });

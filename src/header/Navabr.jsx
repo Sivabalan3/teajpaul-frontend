@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 
 function Navbar() {
   return (
-    <ul className="grid grid-flow-col text-center border-b border-gray-200 text-gray-500 sticky top-0 z-50">
+    <ul className="grid grid-flow-col text-center border-b bg-gray-200 border-gray-200 text-gray-500 sticky top-0 z-50">
       <li>
         <NavLink
           to="/"
@@ -49,7 +49,7 @@ function Navbar() {
               : "flex justify-center border-b-4 border-transparent hover:text-indigo-600 hover:border-indigo-600 py-4"
           }
         >
-          Qutation File
+          Quotation File
         </NavLink>
       </li>
       <li>
