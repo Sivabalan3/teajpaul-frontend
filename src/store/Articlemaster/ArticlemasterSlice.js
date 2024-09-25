@@ -40,11 +40,27 @@ export const getArticleTypes = createAsyncThunk(
   }
 );
 
+// New async thunk for deleting articles
+export const deleteArticles = createAsyncThunk(
+  "articlemaster/deleteArticles",
+  async ({ articleType }, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(
+        `${Base_Url}/api/excel/article/delete/${articleType}`
+      );
+      return response.data; // Assuming response contains a message
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
 const articleMaster = createSlice({
   name: "articlemaster",
   initialState: {
     ArticleMasterFileUpload: { data: null, loading: false, error: null },
     getArticleTypes: { data: [], loading: false, error: null },
+    deleteArticle: { loading: false, error: null }, // Initial state for delete
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -80,6 +96,24 @@ const articleMaster = createSlice({
       .addCase(getArticleTypes.rejected, (state, action) => {
         state.getArticleTypes.loading = false;
         state.getArticleTypes.error = action.payload;
+      })
+      .addCase(deleteArticles.pending, (state) => {
+        state.deleteArticle.loading = true;
+        state.deleteArticle.error = null;
+      })
+      .addCase(deleteArticles.fulfilled, (state, action) => {
+        state.deleteArticle.loading = false;
+        state.deleteArticle.error = null;
+        Swal.fire({
+          title: "Success",
+          text: action.payload.message || "Articles deleted successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      })
+      .addCase(deleteArticles.rejected, (state, action) => {
+        state.deleteArticle.loading = false;
+        state.deleteArticle.error = action.payload;
       });
   },
 });

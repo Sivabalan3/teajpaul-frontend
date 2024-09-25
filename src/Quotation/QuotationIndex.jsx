@@ -32,6 +32,11 @@ function QuotationIndex() {
     }
   };
 
+  const handleExportDelete = () => {
+    if (tableRef.current) {
+      tableRef.current.handleDeleteAllData();
+    }
+  };
   return (
     <>
       <div className="flex justify-around">
@@ -61,6 +66,7 @@ function QuotationIndex() {
         </svg>
           </button>
           <button type="button"
+          onClick={handleExportDelete}
         className="px-5 flex items-center justify-center rounded text-white text-sm tracking-wider font-medium border-none outline-none bg-red-600 hover:bg-red-700 active:bg-red-600">
         <span className="border-r border-white pr-3">Delete</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="11px" fill="currentColor" class="ml-3 inline" viewBox="0 0 320.591 320.591">

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getArticleTypes } from "../store/Articlemaster/ArticlemasterSlice";
+import { getArticleTypes, deleteArticles } from "../store/Articlemaster/ArticlemasterSlice"; // Import deleteArticleFile
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.css';
 import { HotTable } from '@handsontable/react';
@@ -9,13 +9,18 @@ import * as XLSX from 'xlsx';
 
 const ArticlemasterDynamicTable = forwardRef(({ Articletype }, ref) => {
   const [isEditable, setIsEditable] = useState(false);
+  const [articleData, setArticleData] = useState([]); // Local state for article data
   const dispatch = useDispatch();
-  const { data: ArticleData, loading, error } = useSelector((state) => state.articlemaster.getArticleTypes);
+  const { loading, error } = useSelector((state) => state.articlemaster.getArticleTypes);
   const hotTableComponent = useRef(null);
 
   useEffect(() => {
     if (Articletype) {
-      dispatch(getArticleTypes({ articleType: Articletype }));
+      dispatch(getArticleTypes({ articleType: Articletype })).then(response => {
+        if (response.meta.requestStatus === 'fulfilled') {
+          setArticleData(response.payload); // Assuming the response payload contains the article data
+        }
+      });
     }
   }, [dispatch, Articletype]);
 
@@ -44,12 +49,37 @@ const ArticlemasterDynamicTable = forwardRef(({ Articletype }, ref) => {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
       XLSX.writeFile(wb, "spar_article.xlsx");
-    }
+    },
+    handleDeleteData: () => {
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to delete the entire file?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, cancel!',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          dispatch(deleteArticles({ articleType: Articletype }))
+            .then((response) => {
+              if (response.meta.requestStatus === 'fulfilled') {
+                setArticleData([]); // Clear the article data
+                Swal.fire('Deleted!', 'The file has been deleted.', 'success');
+              } else {
+                Swal.fire('Error!', 'There was an error deleting the file.', 'error');
+              }
+            })
+            .catch(() => {
+              Swal.fire('Error!', 'There was an error deleting the file.', 'error');
+            });
+        }
+      });
+    },
   }));
 
   useEffect(() => {
-    if (ArticleData.length && hotTableComponent.current) {
-      const headers = Object.keys(ArticleData[0]).filter(
+    if (articleData.length && hotTableComponent.current) {
+      const headers = Object.keys(articleData[0]).filter(
         (header) => header !== "_id" && header !== "__v"
       );
       const columns = headers.map((header) => ({
@@ -59,7 +89,7 @@ const ArticlemasterDynamicTable = forwardRef(({ Articletype }, ref) => {
       }));
 
       hotTableComponent.current.hotInstance.updateSettings({
-        data: ArticleData.map((row) => {
+        data: articleData.map((row) => {
           const { _id, __v, ...filteredRow } = row;
           return filteredRow;
         }),
@@ -86,7 +116,8 @@ const ArticlemasterDynamicTable = forwardRef(({ Articletype }, ref) => {
         columnSorting: true,
       });
     }
-  }, [ArticleData, isEditable]);
+  }, [articleData, isEditable]);
+
   if (loading)
     return (
       <div className="w-full gap-x-2 flex justify-center items-center h-screen my-auto justify-center">
@@ -99,26 +130,25 @@ const ArticlemasterDynamicTable = forwardRef(({ Articletype }, ref) => {
   if (error) return <p>Error: {error}</p>;
   if (!Articletype || (Articletype !== "D-mart" && Articletype !== "Spaar")) {
     return (
-      <section class="flex items-center h-screen p-16 bg-gray-50 dark:bg-gray-700">
-    <div class="container flex flex-col items-center ">
-        <div class="flex flex-col gap-6 max-w-md text-center">
-            <h2 class="font-extrabold text-9xl text-gray-600 dark:text-gray-100">
-                <span class="sr-only">Error</span>404
+      <section className="flex items-center h-screen p-16 bg-gray-50 dark:bg-gray-700">
+        <div className="container flex flex-col items-center ">
+          <div className="flex flex-col gap-6 max-w-md text-center">
+            <h2 className="font-extrabold text-9xl text-gray-600 dark:text-gray-100">
+              <span className="sr-only">Error</span>404
             </h2>
-            <p class="text-2xl md:text-3xl dark:text-gray-300">Please select valid Article File</p>
-           
+            <p className="text-2xl md:text-3xl dark:text-gray-300">Please select a valid Article File</p>
+          </div>
         </div>
-    </div>
-</section>
+      </section>
     );
   }
+
   return (
     <>
-     
       <HotTable
         ref={hotTableComponent}
         settings={{
-          data: ArticleData.map((row) => {
+          data: articleData.map((row) => {
             const { _id, __v, ...filteredRow } = row;
             return filteredRow;
           }),
@@ -139,5 +169,7 @@ const ArticlemasterDynamicTable = forwardRef(({ Articletype }, ref) => {
     </>
   );
 });
+
+ArticlemasterDynamicTable.displayName = "ArticlemasterDynamicTable";
 
 export default ArticlemasterDynamicTable;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArticleMasterFileUpload } from "../store/Articlemaster/ArticlemasterSlice";
+import { ArticleMasterFileUpload ,getArticleTypes} from "../store/Articlemaster/ArticlemasterSlice";
 import { useSelector, useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
@@ -66,6 +66,7 @@ function ArticleUploadFile({ isOpen, closeModal }) {
         }).then(() => {
           closeModal();
           resetForm();
+          dispatch(getArticleTypes());
         });
       })
       .catch((error) => {

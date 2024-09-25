@@ -12,6 +12,7 @@ import "handsontable/dist/handsontable.full.css";
 import { HotTable } from "@handsontable/react";
 import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
+import { Base_Url } from "../Api";
 
 const QuotationTable = forwardRef(({ QutationType }, ref) => {
   const [isEditable, setIsEditable] = useState(false);
@@ -59,7 +60,42 @@ const QuotationTable = forwardRef(({ QutationType }, ref) => {
       XLSX.utils.book_append_sheet(wb, ws, "spar_article.xlsx");
       XLSX.writeFile(wb, "spar_article.xlsx");
     },
+    handleDeleteAllData: async () => {
+      const confirmDelete = await Swal.fire({
+        title: "Are you sure?",
+        text: "This will delete all quotations. This action cannot be undone.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Delete All",
+        cancelButtonText: "Cancel",
+      });
+
+      if (confirmDelete.isConfirmed) {
+        await deleteAllQuotationsFromBackend();
+
+        hotTableComponent.current.hotInstance.loadData([]);
+
+        Swal.fire("Deleted!", "All quotations have been deleted.", "success");
+      }
+    },
   }));
+
+  const deleteAllQuotationsFromBackend = async () => {
+    try {
+      const response = await fetch(`${Base_Url}/api/excel/qutation/delete/all`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete all quotations");
+      }
+    } catch (error) {
+      console.error("Error deleting quotations from backend:", error);
+      Swal.fire("Error", "Failed to delete all quotations from backend", "error");
+    }
+  };
 
   useEffect(() => {
     if (QutationData.length && hotTableComponent.current) {
@@ -158,5 +194,8 @@ const QuotationTable = forwardRef(({ QutationType }, ref) => {
     </>
   );
 });
+
+QuotationTable.displayName = "QuotationTable";
+
 
 export default QuotationTable;
