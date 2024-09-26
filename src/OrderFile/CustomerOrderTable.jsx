@@ -5,23 +5,40 @@ import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import CustomerArticleExcelUpload from "./CustomerOrderUpload";
 import { useSelector, useDispatch } from "react-redux";
-import { DeleteOrderFile, getCustomerExcelData } from "../store/customerOrder/customerOrderSlice";
+import {
+  DeleteOrderFile,
+  getCustomerExcelData,
+} from "../store/customerOrder/customerOrderSlice";
+import ExportModal from "./ExportModel"; // Import the modal component
+import OrderPendingTable from "./pendingTable";
 
 const CustomerArticleTable = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false); // State for export modal
 
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
+  const closeExportModal = () => setIsExportModalOpen(false); // Close export modal
+  const openExportModal = () => setIsExportModalOpen(true); // Open export modal
+
   const dispatch = useDispatch();
-  const {
-    data: customerArticle,
-    loading,
-    error,
-  } = useSelector((state) => state.customerExcel.getCustomerExcelData);
+  const { data: customerArticle, loading } = useSelector(
+    (state) => state.customerExcel.getCustomerExcelData
+  );
+  const { data: pendingorder } = useSelector(
+    (state) => state.customerExcel.getCustomerPendingData
+  ); // Select pending order data
+
+  const {data:outOfStockData} = useSelector(
+    (state) => state.customerExcel.getCustomerOutOfstocksOrder 
+  )
+  const {data:mismatchValueData} = useSelector(
+    (state) => state.customerExcel.getCustomervalueMismatchdata 
+  )
+  
   const [isEditable, setIsEditable] = useState(false);
   const CustomerArticleTable = useRef(null);
   const [customerData, setCustomerData] = useState([]);
-  const [buttonLabel, setButtonLabel] = useState("Enable Edit");
 
   useEffect(() => {
     dispatch(getCustomerExcelData());
@@ -29,13 +46,11 @@ const CustomerArticleTable = () => {
 
   useEffect(() => {
     if (customerArticle) {
-      const filteredData = customerArticle.map((row) => {
-        const { _id, __v, ...rest } = row;
-        return rest;
-      });
+      const filteredData = customerArticle.map(({ _id, __v, ...rest }) => rest);
       setCustomerData(filteredData);
     }
   }, [customerArticle]);
+  
 
   useEffect(() => {
     if (customerData.length && CustomerArticleTable.current) {
@@ -71,113 +86,171 @@ const CustomerArticleTable = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         setIsEditable(true);
-        setButtonLabel("Save Edit");
         Swal.fire("Editing Enabled!", "You can now edit the table.", "success");
       }
     });
   };
 
-  const saveEdits = async () => {
+  const saveEdits = () => {
     // Implement save logic here
     Swal.fire("Saved!", "Changes have been saved.", "success");
     setIsEditable(false);
-    setButtonLabel("Enable Edit");
   };
 
-  const exportData = () => {
-    const hotInstance = CustomerArticleTable.current.hotInstance;
-    const data = hotInstance.getData();
-    const headers = hotInstance.getColHeader();
-
-    const filteredHeaders = headers.filter(
-      (header) => header !== "_id" && header !== "__v"
-    );
-    const filteredData = data.map((row) =>
-      row.filter(
-        (_, index) => headers[index] !== "_id" && headers[index] !== "__v"
-      )
-    );
-
-    const dataWithHeaders = [filteredHeaders, ...filteredData];
-    const ws = XLSX.utils.aoa_to_sheet(dataWithHeaders);
+  const exportData = async (fileName, selectedType, poNumber, poDate) => {
+    // Function to filter out _id and __v from an array of objects
+    const filterData = (data) => {
+      return data.map(({ _id, __v, ...filteredRow }) => filteredRow);
+    };
+  
+    // Filter customerData
+    const filteredCustomerData = filterData(customerData);
+    const headersCustomer = Object.keys(filteredCustomerData[0]);
+  
+    // Create a new workbook and worksheet
+    const ws = XLSX.utils.aoa_to_sheet([]);
+  
+    // Add the Purchase Order details at the top of the worksheet
+    XLSX.utils.sheet_add_aoa(ws, [
+      ["Customer Order Data"], // Title for Customer Order
+      [`PO Number: ${poNumber}`], // PO Number
+      [`PO Date: ${poDate}`], // PO Date
+      [], // Empty row to add some spacing
+      headersCustomer, // Add headers for customer order
+    ], { origin: 0 });
+  
+    // Add customer data rows to the worksheet
+    XLSX.utils.sheet_add_aoa(ws, filteredCustomerData.map(Object.values), { origin: -1 });
+  
+    // Add a section for Pending Orders
+    XLSX.utils.sheet_add_aoa(ws, [
+      [], // Empty row
+      ["Pending Order Data"], // Title for Pending Orders
+      [], // Empty row to add some spacing
+    ], { origin: -1 });
+  
+    // Filter pending order data
+    const filteredPendingOrder = filterData(pendingorder);
+    if (filteredPendingOrder.length > 0) {
+      const headersPending = Object.keys(filteredPendingOrder[0]);
+      XLSX.utils.sheet_add_aoa(ws, [headersPending], { origin: -1 });
+      XLSX.utils.sheet_add_aoa(ws, filteredPendingOrder.map(Object.values), { origin: -1 }); // Add pending order data
+    }
+  
+    // Add Out of Stock Data
+    XLSX.utils.sheet_add_aoa(ws, [
+      [],
+      ["Out of Stock Data"],
+      [],
+    ], { origin: -1 });
+  
+    // Filter out of stock data
+    const filteredOutOfStockData = filterData(outOfStockData);
+    if (filteredOutOfStockData.length > 0) {
+      const headersOutOfStock = Object.keys(filteredOutOfStockData[0]);
+      XLSX.utils.sheet_add_aoa(ws, [headersOutOfStock], { origin: -1 });
+      XLSX.utils.sheet_add_aoa(ws, filteredOutOfStockData.map(Object.values), { origin: -1 });
+    }
+  
+    // Add a section for Mismatch Value Data
+    XLSX.utils.sheet_add_aoa(ws, [
+      [],
+      ["Mismatch Value Data"],
+      [],
+    ], { origin: -1 });
+  
+    // Filter mismatch value data
+    const filteredMismatchValueData = filterData(mismatchValueData);
+    if (filteredMismatchValueData.length > 0) {
+      const headersMismatch = Object.keys(filteredMismatchValueData[0]);
+      XLSX.utils.sheet_add_aoa(ws, [headersMismatch], { origin: -1 });
+      XLSX.utils.sheet_add_aoa(ws, filteredMismatchValueData.map(Object.values), { origin: -1 });
+    }
+  
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "successorder.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, 'Orders');
+  
+    const time = new Date();
+    const day = time.getDate();
+    const month = time.getMonth() + 1;
+    const year = time.getFullYear();
+  
+    let hours = time.getHours();
+    const minutes = String(time.getMinutes()).padStart(2, '0');
+  
+    const amPm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? String(hours).padStart(2, '0') : '12';
+  
+    const formattedTime = `${hours}:${minutes} ${amPm}`;
+    const formattedDate = `${day}-${month}-${year} ${formattedTime}`;
+  
+    XLSX.writeFile(wb, `${fileName}_${selectedType}__${formattedDate}.xlsx`);
   };
+  
+  
+  
 
   if (loading)
     return (
       <div className="w-full gap-x-2 flex justify-center items-center h-screen my-auto justify-center">
         <div className="w-5 bg-[#d991c2] animate-pulse h-5 rounded-full animate-bounce"></div>
         <div className="w-5 animate-pulse h-5 bg-[#9869b8] rounded-full animate-bounce"></div>
-        <div className="w-5 h-5 animate-pulse bg-[#6756cc] rounded-full animate-bounce"></div>
+        <div className="w-5 h-5 animate-pulse bg-[#58c5c4] rounded-full animate-bounce"></div>
       </div>
     );
-    const handleDelete = () => {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "Do you really want to delete the All order file?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "Cancel",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            await dispatch(DeleteOrderFile()).unwrap();
-            dispatch(getCustomerExcelData());
-            Swal.fire("Deleted!", "All order file has been deleted.", "success");
-          } catch (error) {
-            console.error("Error deleting order file", error);
-            Swal.fire("Error!", "Failed to delete order file.", "error");
-          }
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          Swal.fire("Cancelled", "Your order file is safe :)", "error");
-        }
-      });
-    };
+
+  const handleDelete = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to delete all orders?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete!",
+      cancelButtonText: "No, cancel!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(DeleteOrderFile());
+        Swal.fire("Deleted!", "All order files have been deleted.", "success");
+      }
+    });
+  };
+
   return (
-    <div>
-      <div className="flex justify-between py-6">
+    <div className="-mt-12 sticky top-5">
+      <h1 className="text-indigo-600 font-extrabold text-3xl text-center pb-4">
+        Success Order
+      </h1>
+      <div className="flex justify-between items-center py-4 -mt-16">
         <button
           type="button"
           onClick={openModal}
-          className="px-4 mt-10 py-2 rounded-lg text-white text-sm border-none outline-none tracking-wide bg-blue-600 hover:bg-blue-700 active:bg-blue-600"
+          className="px-5 py-2.5 mt-2 rounded-full bg-blue-600 text-white text-sm font-semibold tracking-wide hover:bg-blue-700"
         >
           Upload Article
         </button>
         <CustomerArticleExcelUpload isOpen={isOpen} closeModal={closeModal} />
-        <div className="flex gap-4 py-7">
+        <div className="flex gap-4 items-center">
           <button
             onClick={enableEdit}
-            className="focus:outline-none text-white bg-lime-400 hover:bg-lime-500 focus:ring-4 focus:ring-lime-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
+            className="px-5 py-2.5 bg-lime-500 text-white rounded-full text-sm font-medium hover:bg-lime-600"
           >
-            UPDATE
+            Update
           </button>
           <button
-            onClick={enableEdit}
-            className="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
-          >
-            Enable Edit
-          </button>
-          <button
-            onClick={exportData}
-            className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            onClick={openExportModal} // Open the export modal
+            className="px-5 py-2.5 bg-yellow-500 text-white rounded-full text-sm font-medium hover:bg-yellow-600"
           >
             Export
           </button>
-          <button 
-          onClick={handleDelete}
-           className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+          <button
+            onClick={handleDelete}
+            className="px-5 py-2.5 bg-red-600 text-white rounded-full text-sm font-medium hover:bg-red-700"
+          >
             Delete
           </button>
         </div>
       </div>
-      <h1 className="text-indigo-500 font-extrabold text-3xl text-center pb-2">
-        Success Order
-      </h1>
       <HotTable
         className="custom-table"
         ref={CustomerArticleTable}
@@ -195,6 +268,11 @@ const CustomerArticleTable = () => {
           licenseKey: "non-commercial-and-evaluation",
         }}
         style={{ width: "100%" }}
+      />
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={closeExportModal}
+        onExport={exportData} // Pass the export function
       />
     </div>
   );

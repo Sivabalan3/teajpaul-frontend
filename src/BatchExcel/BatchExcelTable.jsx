@@ -8,8 +8,9 @@ import {
   batchFetchExcelData,
   DeleteBatchExcelFile,
 } from "../store/batchexcelfile/batchExcelFileSlice";
+import BatchUploadFile from "./BatchUploadFile";
+
 import { useDispatch, useSelector } from "react-redux";
-import BatchuploadFile from "./BatchuploadFile";
 import axios from "axios";
 
 const BatchExcelTable = () => {
@@ -22,6 +23,10 @@ const BatchExcelTable = () => {
   const [buttonLabel, setButtonLabel] = useState("Enable Edit");
   const BatchTableRef = useRef(null);
   const [updates, setUpdates] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
 
   useEffect(() => {
     dispatch(batchFetchExcelData());
@@ -195,77 +200,87 @@ const BatchExcelTable = () => {
 
   if (loading)
     return (
-      <div className="w-full gap-x-2 flex justify-center items-center h-screen my-auto justify-center">
-        <div className="w-5 bg-[#d991c2] animate-pulse h-5 rounded-full animate-bounce"></div>
-        <div className="w-5 animate-pulse h-5 bg-[#9869b8] rounded-full animate-bounce"></div>
-        <div className="w-5 h-5 animate-pulse bg-[#6756cc] rounded-full animate-bounce"></div>
+      <div className="w-full gap-x-2 flex justify-center items-center h-screen my-auto ">
+        <div className="w-5 bg-[#d991c2]  h-5 rounded-full animate-bounce"></div>
+        <div className="w-5  h-5 bg-[#9869b8] rounded-full animate-bounce"></div>
+        <div className="w-5 h-5  bg-[#6756cc] rounded-full animate-bounce"></div>
       </div>
     );
 
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div>
-      <h1 className="text-indigo-500 font-extrabold text-3xl text-center">
-        Batch File Excel Upload and Display
-      </h1>
-      <div className="flex py-6 justify-between">
-        <BatchuploadFile />
-        <div className="flex py-2">
-          <button
-            onClick={enableEdit}
-            className="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
-          >
-            {buttonLabel}
-          </button>
-          {isEditable && (
+    <>
+      <div className="p-6 bg-white shadow-lg rounded-lg">
+        <h1 className="text-indigo-500 font-extrabold text-3xl text-center mb-6">
+          Batch File Excel Upload and Display
+        </h1>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-3">
             <button
-              onClick={saveEdits}
-              className="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              onClick={openModal}
+              className="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-full hover:bg-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-300 transition dark:focus:ring-blue-900"
             >
-              Save
+              Upload A Batch File
             </button>
-          )}
-          <button
-            onClick={exportData}
-            className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-          >
-            Export
-          </button>
-          <button
-            onClick={handleDelete}
-            className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-          >
-            Delete
-          </button>
+            <div className="absolute right-5">
+              <button
+                onClick={enableEdit}
+                className="px-5 py-2.5 text-sm font-medium text-white bg-yellow-400 rounded-full hover:bg-yellow-500 focus:outline-none focus:ring-4 focus:ring-yellow-300 transition dark:focus:ring-yellow-900 me-2"
+              >
+                {buttonLabel}
+              </button>
+              {isEditable && (
+                <button
+                  onClick={saveEdits}
+                  className="px-5 py-2.5 text-sm font-medium text-white bg-blue-700 rounded-full hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition dark:focus:ring-blue-800 me-2"
+                >
+                  Save
+                </button>
+              )}
+              <button
+                onClick={exportData}
+                className="px-5 py-2.5 text-sm font-medium text-white bg-green-700 rounded-full hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 transition dark:focus:ring-green-800 me-2"
+              >
+                Export
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-5 py-2.5 text-sm font-medium text-white bg-red-700 rounded-full hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 transition dark:focus:ring-red-900 me-2"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
+        <HotTable
+          className="custom-table"
+          ref={BatchTableRef}
+          settings={{
+            data: batchdata,
+            colHeaders: true,
+            rowHeaders: true,
+            stretchH: "all",
+            dropdownMenu: true,
+            contextMenu: true,
+            filters: true,
+            columnSorting: true,
+            width: "100%",
+            height: "80vh",
+            licenseKey: "non-commercial-and-evaluation",
+            cells: (row, col, prop) => {
+              const cellProperties = {};
+              if (batchdata[row] && batchdata[row][prop] === "INVALID") {
+                cellProperties.renderer = "invalidCellRenderer";
+              }
+              return cellProperties;
+            },
+          }}
+          style={{ width: "100%" }}
+        />
       </div>
-      <HotTable
-        className="custom-table"
-        ref={BatchTableRef}
-        settings={{
-          data: batchdata,
-          colHeaders: true,
-          rowHeaders: true,
-          stretchH: "all",
-          dropdownMenu: true,
-          contextMenu: true,
-          filters: true,
-          columnSorting: true,
-          width: "100%",
-          height: "80vh",
-          licenseKey: "non-commercial-and-evaluation",
-          cells: (row, col, prop) => {
-            const cellProperties = {};
-            if (batchdata[row] && batchdata[row][prop] === "INVALID") {
-              cellProperties.renderer = "invalidCellRenderer";
-            }
-            return cellProperties;
-          },
-        }}
-        style={{ width: "100%" }}
-      />
-    </div>
+      <BatchUploadFile isOpen={isOpen} closeModal={closeModal} />
+    </>
   );
 };
 

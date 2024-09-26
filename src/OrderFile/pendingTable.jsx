@@ -24,15 +24,20 @@ function OrderPendingTable() {
   useEffect(() => {
     if (pendingorder && pendingTable.current) {
       // Filter out the '_id' and '__v' keys
-      const headers = pendingorder.length > 0 ? Object.keys(pendingorder[0]).filter(header => header !== '_id' && header !== '__v') : [];
+      const headers =
+        pendingorder.length > 0
+          ? Object.keys(pendingorder[0]).filter(
+              (header) => header !== "_id" && header !== "__v"
+            )
+          : [];
       const columns = headers.map((header) => ({
         data: header,
         title: header,
-        readOnly: true, 
+        readOnly: true,
       }));
 
       pendingTable.current.hotInstance.updateSettings({
-        data: pendingorder.map(order => {
+        data: pendingorder.map((order) => {
           const { _id, __v, ...filteredOrder } = order;
           return filteredOrder;
         }),
@@ -61,30 +66,32 @@ function OrderPendingTable() {
 
   return (
     <>
-      <h1 className="text-indigo-500 font-extrabold text-3xl text-center">
-        Pending Order
-      </h1>
-      <HotTable
-        className="custom-table"
-        ref={pendingTable}
-        settings={{
-          data: pendingorder.map(order => {
-            const { _id, __v, ...filteredOrder } = order;
-            return filteredOrder;
-          }),
-          colHeaders: true,
-          rowHeaders: true,
-          dropdownMenu: true,
-          contextMenu: true,
-          filters: true,
-          columnSorting: true,
-          stretchH: "all",
-          width: "100%",
-          height: "60vh",
-          licenseKey: "non-commercial-and-evaluation",
-        }}
-        style={{ width: "100%" }}
-      />
+      <div className="sticky top-5">
+        <h1 className="text-indigo-500 font-extrabold text-3xl text-center ">
+          Pending Order
+        </h1>
+        <HotTable
+          className="custom-table"
+          ref={pendingTable}
+          settings={{
+            data: pendingorder.map((order) => {
+              const { _id, __v, ...filteredOrder } = order;
+              return filteredOrder;
+            }),
+            colHeaders: true,
+            rowHeaders: true,
+            dropdownMenu: true,
+            contextMenu: true,
+            filters: true,
+            columnSorting: true,
+            stretchH: "all",
+            width: "100%",
+            height: "60vh",
+            licenseKey: "non-commercial-and-evaluation",
+          }}
+          style={{ width: "100%" }}
+        />
+      </div>
     </>
   );
 }

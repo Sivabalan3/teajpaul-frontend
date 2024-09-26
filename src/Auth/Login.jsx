@@ -18,7 +18,7 @@ export const Login = () => {
     try {
       const response = await axios.post(`${Base_Url}/api/auth/login`, formData);
       localStorage.setItem("user", JSON.stringify(response.data.user));  // Store user in localStorage
-      window.location.href = "/";  // Redirect after successful login
+      window.location.href = "/home";  // Redirect after successful login
     } catch (err) {
       setError("Invalid credentials, please try again.");
     }

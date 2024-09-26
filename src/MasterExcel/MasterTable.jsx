@@ -10,12 +10,17 @@ import {
   fetchExcelData,
 } from "../store/masterexcelfile/masterExcelFileSlice";
 import { useDispatch } from "react-redux";
-import ExcelUpload from "./masteruploadfile";
+import MasterUploadFile from "./MasterUploadFile";
 
 const DataTable = ({ data }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [isEditable, setIsEditable] = useState(false);
   const hotTableComponent = useRef(null);
   const dispatch = useDispatch();
+
+
+   const openModal = () => setIsOpen(true);
+    const closeModal = () => setIsOpen(false);
 
   useEffect(() => {
     if (data.length && hotTableComponent.current) {
@@ -91,6 +96,7 @@ const DataTable = ({ data }) => {
     const headers = hotInstance.getColHeader();
     const dataWithHeaders = [headers, ...updatedData];
 
+   
     try {
       await axios.put("http://localhost:5000/api/excel/update", {
         data: dataWithHeaders,
@@ -150,52 +156,64 @@ const DataTable = ({ data }) => {
   };
 
   return (
-    <div>
-      <div className="flex py-7 justify-between">
-        <ExcelUpload />
-        <div className="flex">
-          <button
-            onClick={enableEdit}
-            className="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
-          >
-            Enable Edit
-          </button>
-          <button
-            onClick={exportData}
-            className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-          >
-            Export
-          </button>
-          <button
-            onClick={handleDelete}
-            className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-          >
-            Delete
-          </button>
+    <>
+      <div>
+        <div className="flex py-7 justify-between">
+          <div className="flex">
+            <button
+              onClick={openModal}
+              className="focus:outline-none text-white bg-blue-700 hover:bg-blue-500 focus:ring-4 focus:ring-blue-700 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-blue-900 ml-10"
+            >
+              Upload A Master File
+            </button>
+            <div className="absolute right-5">
+
+            <button
+              onClick={enableEdit}
+              className="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900"
+            >
+              Enable Edit
+            </button>
+            <button
+              onClick={exportData}
+              className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+            >
+              Export
+            </button>
+            <button
+              onClick={handleDelete}
+              className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+            >
+              Delete
+            </button>
         </div>
+          </div>
+        </div>
+        <HotTable
+          ref={hotTableComponent}
+          settings={{
+            data: data.map((row) => {
+              const { _id, __v, ...filteredRow } = row;
+              return filteredRow;
+            }),
+            colHeaders: true,
+            rowHeaders: true,
+            stretchH: "all",
+            className: "custom-table",
+            dropdownMenu: true,
+            contextMenu: true,
+            filters: true,
+            columnSorting: true,
+            width: "100%",
+            height: "80vh",
+            licenseKey: "non-commercial-and-evaluation",
+          }}
+          style={{ width: "100%" }}
+        />
       </div>
-      <HotTable
-        ref={hotTableComponent}
-        settings={{
-          data: data.map((row) => {
-            const { _id, __v, ...filteredRow } = row;
-            return filteredRow;
-          }),
-          colHeaders: true,
-          rowHeaders: true,
-          stretchH: "all",
-          className: "custom-table",
-          dropdownMenu: true,
-          contextMenu: true,
-          filters: true,
-          columnSorting: true,
-          width: "100%",
-          height: "80vh",
-          licenseKey: "non-commercial-and-evaluation",
-        }}
-        style={{ width: "100%" }}
-      />
-    </div>
+
+      <MasterUploadFile isOpen={isOpen} closeModal={closeModal} />
+    </>
   );
 };
 

@@ -67,6 +67,8 @@ function MismatchTable() {
 
   return (
     <>
+    <div className='sticky top-5'>
+
       <h1 className="text-indigo-500 font-extrabold text-3xl text-center">
         Mismatch value
       </h1>
@@ -89,6 +91,7 @@ function MismatchTable() {
         licenseKey="non-commercial-and-evaluation"
         style={{ width: "100%" }}
       />
+    </div>
     </>
   );
 }

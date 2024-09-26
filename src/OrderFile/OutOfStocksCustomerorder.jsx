@@ -64,6 +64,8 @@ function OutOfStocksCustomerorder() {
 
   return (
     <>
+    <div className="sticky top-5">
+
       <h1 className="text-indigo-500 font-extrabold text-3xl text-center">
         Out of Stock Customer Orders
       </h1>
@@ -89,6 +91,8 @@ function OutOfStocksCustomerorder() {
         }}
         style={{ width: "100%" }}
       />
+    </div>
+
     </>
   );
 }
