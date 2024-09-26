@@ -6,7 +6,7 @@ function Navbar() {
     <ul className="grid grid-flow-col text-center border-b bg-gray-200 border-gray-200 text-gray-500 sticky top-0 z-50">
       <li>
         <NavLink
-          to="/"
+          to="/home"
           className={({ isActive }) =>
             isActive
               ? "flex justify-center border-b-4 border-indigo-600 text-indigo-600 py-4"

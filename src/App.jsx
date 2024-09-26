@@ -16,9 +16,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login />} /> 
+        <Route path="/" element={<Login />} /> 
         
-        <Route path="/" element={<><Navabr /><ArticleMasterIndex /></>} />
+        <Route path="/home" element={<><Navabr /><ArticleMasterIndex /></>} />
         <Route path="/item-master" element={<><Navabr /><Home /></>} />
         <Route path="/batch" element={<><Navabr /><BatchExcelTable /></>} />
         <Route path="/qutation" element={<><Navabr /><QuotationIndex /></>} />
