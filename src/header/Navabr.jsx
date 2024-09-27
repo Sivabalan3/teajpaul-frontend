@@ -1,7 +1,19 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { FaExpand, FaCompress } from "react-icons/fa";
+import { useState } from "react"; 
 
 function Navbar() {
+  const [isFullscreen, setIsFullscreen] = useState(false); 
+
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+    setIsFullscreen(!isFullscreen); 
+  };
   return (
     <ul className="grid grid-flow-col text-center border-b bg-gray-200 border-gray-200 text-gray-500 sticky top-0 z-50">
       <li>
@@ -64,15 +76,15 @@ function Navbar() {
           Order File
         </NavLink>
       </li>
-      {/* <li>
-        <a
-          href="#page4"
-          className="flex justify-center border-b-4 border-transparent hover:text-indigo-600 hover:border-indigo-600 py-4"
-        >
-          Server Browser
-        </a>
-      </li>
       <li>
+      <button
+        onClick={toggleFullscreen}
+        className="flex absolute right-10 top-2 justify-center items-center border-b-4 border-transparent hover:text-indigo-600 hover:border-indigo-600 py-4"
+      >
+        {isFullscreen ? <FaCompress /> : <FaExpand />} {/* Display icon based on state */}
+      </button>
+      </li>
+      {/* <li>
         <a
           href="#page5"
           className="flex justify-center border-b-4 border-transparent hover:text-indigo-600 hover:border-indigo-600 py-4"

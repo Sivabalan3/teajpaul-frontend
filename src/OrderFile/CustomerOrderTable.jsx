@@ -272,6 +272,7 @@ const exportData = async (fileName, selectedType, poNumber, poDate) => {
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(DeleteOrderFile());
+        setCustomerData([]);
         Swal.fire("Deleted!", "All order files have been deleted.", "success");
       }
     });
