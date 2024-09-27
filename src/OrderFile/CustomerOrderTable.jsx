@@ -11,6 +11,7 @@ import {
 } from "../store/customerOrder/customerOrderSlice";
 import ExportModal from "./ExportModel"; // Import the modal component
 import OrderPendingTable from "./pendingTable";
+import ExcelJS from 'exceljs';
 
 const CustomerArticleTable = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -97,96 +98,156 @@ const CustomerArticleTable = () => {
     setIsEditable(false);
   };
 
-  const exportData = async (fileName, selectedType, poNumber, poDate) => {
-    // Function to filter out _id and __v from an array of objects
-    const filterData = (data) => {
-      return data.map(({ _id, __v, ...filteredRow }) => filteredRow);
-    };
-  
-    // Filter customerData
-    const filteredCustomerData = filterData(customerData);
-    const headersCustomer = Object.keys(filteredCustomerData[0]);
-  
-    // Create a new workbook and worksheet
-    const ws = XLSX.utils.aoa_to_sheet([]);
-  
-    // Add the Purchase Order details at the top of the worksheet
-    XLSX.utils.sheet_add_aoa(ws, [
-      ["Customer Order Data"], // Title for Customer Order
-      [`PO Number: ${poNumber}`], // PO Number
-      [`PO Date: ${poDate}`], // PO Date
-      [], // Empty row to add some spacing
-      headersCustomer, // Add headers for customer order
-    ], { origin: 0 });
-  
-    // Add customer data rows to the worksheet
-    XLSX.utils.sheet_add_aoa(ws, filteredCustomerData.map(Object.values), { origin: -1 });
-  
-    // Add a section for Pending Orders
-    XLSX.utils.sheet_add_aoa(ws, [
-      [], // Empty row
-      ["Pending Order Data"], // Title for Pending Orders
-      [], // Empty row to add some spacing
-    ], { origin: -1 });
-  
-    // Filter pending order data
-    const filteredPendingOrder = filterData(pendingorder);
-    if (filteredPendingOrder.length > 0) {
-      const headersPending = Object.keys(filteredPendingOrder[0]);
-      XLSX.utils.sheet_add_aoa(ws, [headersPending], { origin: -1 });
-      XLSX.utils.sheet_add_aoa(ws, filteredPendingOrder.map(Object.values), { origin: -1 }); // Add pending order data
-    }
-  
-    // Add Out of Stock Data
-    XLSX.utils.sheet_add_aoa(ws, [
-      [],
-      ["Out of Stock Data"],
-      [],
-    ], { origin: -1 });
-  
-    // Filter out of stock data
-    const filteredOutOfStockData = filterData(outOfStockData);
-    if (filteredOutOfStockData.length > 0) {
-      const headersOutOfStock = Object.keys(filteredOutOfStockData[0]);
-      XLSX.utils.sheet_add_aoa(ws, [headersOutOfStock], { origin: -1 });
-      XLSX.utils.sheet_add_aoa(ws, filteredOutOfStockData.map(Object.values), { origin: -1 });
-    }
-  
-    // Add a section for Mismatch Value Data
-    XLSX.utils.sheet_add_aoa(ws, [
-      [],
-      ["Mismatch Value Data"],
-      [],
-    ], { origin: -1 });
-  
-    // Filter mismatch value data
-    const filteredMismatchValueData = filterData(mismatchValueData);
-    if (filteredMismatchValueData.length > 0) {
-      const headersMismatch = Object.keys(filteredMismatchValueData[0]);
-      XLSX.utils.sheet_add_aoa(ws, [headersMismatch], { origin: -1 });
-      XLSX.utils.sheet_add_aoa(ws, filteredMismatchValueData.map(Object.values), { origin: -1 });
-    }
-  
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Orders');
-  
+ 
+
+
+
+const exportData = async (fileName, selectedType, poNumber, poDate) => {
+  // Function to filter out _id and __v from an array of objects
+  const filterData = (data) => {
+    return data.map(({ _id, __v, ...filteredRow }) => filteredRow);
+  };
+
+  // Filter customerData
+  const filteredCustomerData = filterData(customerData);
+  const headersCustomer = Object.keys(filteredCustomerData[0]);
+
+  // Create a new workbook and add a worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Orders');
+
+  // Define a consistent style for all headings and table headers
+  const headingStyle = {
+    font: { bold: true, size: 14 }, // Bold and font size 14
+    alignment: { horizontal: 'center' }, // Center alignment
+  };
+
+  // Define a style for all data rows
+  const dataStyle = {
+    alignment: { horizontal: 'center' }, // Center alignment for data
+  };
+
+  // Function to apply heading style to a row
+  const applyStyleToRow = (row, isHeading = false) => {
+    row.eachCell((cell) => {
+      if (isHeading) {
+        cell.style = headingStyle; // Apply heading style
+      } else {
+        cell.style = dataStyle; // Apply data style
+      }
+    });
+  };
+
+  // Add the Purchase Order details at the top of the worksheet
+  const customerOrderHeader = worksheet.addRow(["Customer Order Data"]);
+  applyStyleToRow(customerOrderHeader, true); // Apply heading style
+
+  // Add PO Number and PO Date rows and apply styles
+  const poNumberRow = worksheet.addRow([`PO Number: ${poNumber}`]);
+  applyStyleToRow(poNumberRow, true); // Apply style to PO Number row
+
+  const poDateRow = worksheet.addRow([`PO Date: ${poDate}`]);
+  applyStyleToRow(poDateRow, true); // Apply style to PO Date row
+
+  worksheet.addRow([]); // Empty row for spacing
+
+  // Add headers for customer data and apply styles
+  const customerHeadersRow = worksheet.addRow(headersCustomer); 
+  applyStyleToRow(customerHeadersRow, true); // Style the headers
+
+  // Add customer data rows to the worksheet
+  filteredCustomerData.forEach((row) => {
+    const dataRow = worksheet.addRow(Object.values(row));
+    applyStyleToRow(dataRow); // Apply data style
+  });
+
+  // Add and style Pending Order Data heading
+  worksheet.addRow([]); // Empty row
+  const pendingHeader = worksheet.addRow(["Pending Order Data"]);
+  applyStyleToRow(pendingHeader, true); // Apply heading style
+
+  // Filter and add pending order data headers and rows
+  const filteredPendingOrder = filterData(pendingorder);
+  if (filteredPendingOrder.length > 0) {
+    const pendingHeadersRow = worksheet.addRow(Object.keys(filteredPendingOrder[0]));
+    applyStyleToRow(pendingHeadersRow, true); // Style the headers of Pending Orders
+
+    filteredPendingOrder.forEach((row) => {
+      const dataRow = worksheet.addRow(Object.values(row));
+      applyStyleToRow(dataRow); // Apply data style
+    });
+  }
+
+  // Add and style Out of Stock Data heading
+  worksheet.addRow([]);
+  const outOfStockHeader = worksheet.addRow(["Out of Stock Data"]);
+  applyStyleToRow(outOfStockHeader, true); // Apply heading style
+
+  // Filter and add out of stock data headers and rows
+  const filteredOutOfStockData = filterData(outOfStockData);
+  if (filteredOutOfStockData.length > 0) {
+    const outOfStockHeadersRow = worksheet.addRow(Object.keys(filteredOutOfStockData[0]));
+    applyStyleToRow(outOfStockHeadersRow, true); // Style the headers of Out of Stock Data
+
+    filteredOutOfStockData.forEach((row) => {
+      const dataRow = worksheet.addRow(Object.values(row));
+      applyStyleToRow(dataRow); // Apply data style
+    });
+  }
+
+  // Add and style Mismatch Value Data heading
+  worksheet.addRow([]);
+  const mismatchHeader = worksheet.addRow(["Mismatch Value Data"]);
+  applyStyleToRow(mismatchHeader, true); // Apply heading style
+
+  // Filter and add mismatch value data headers and rows
+  const filteredMismatchValueData = filterData(mismatchValueData);
+  if (filteredMismatchValueData.length > 0) {
+    const mismatchHeadersRow = worksheet.addRow(Object.keys(filteredMismatchValueData[0]));
+    applyStyleToRow(mismatchHeadersRow, true); // Style the headers of Mismatch Value Data
+
+    filteredMismatchValueData.forEach((row) => {
+      const dataRow = worksheet.addRow(Object.values(row));
+      applyStyleToRow(dataRow); // Apply data style
+    });
+  }
+
+  // Adjust column widths to fit content and ensure the heading remains centered
+  worksheet.columns.forEach((column) => {
+    column.width = 25; // Adjust width as needed
+  });
+
+  // Generate Excel file as a Blob for download in browser
+  try {
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+    // Create a download link
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+
     const time = new Date();
     const day = time.getDate();
     const month = time.getMonth() + 1;
     const year = time.getFullYear();
-  
     let hours = time.getHours();
     const minutes = String(time.getMinutes()).padStart(2, '0');
-  
     const amPm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? String(hours).padStart(2, '0') : '12';
-  
     const formattedTime = `${hours}:${minutes} ${amPm}`;
     const formattedDate = `${day}-${month}-${year} ${formattedTime}`;
+
+    link.download = `${fileName}_${selectedType}__${formattedDate}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Error exporting Excel file:', error);
+  }
+};
+
   
-    XLSX.writeFile(wb, `${fileName}_${selectedType}__${formattedDate}.xlsx`);
-  };
   
   
   

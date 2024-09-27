@@ -11,6 +11,7 @@ function MasterUploadFile({ isOpen, closeModal }) {
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadInterval, setUploadInterval] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -53,7 +54,8 @@ function MasterUploadFile({ isOpen, closeModal }) {
       });
       return;
     }
-    dispatch(MasterExcelFileUpload( file ))
+    setIsUploading(true);
+    dispatch(MasterExcelFileUpload(file))
       .unwrap()
       .then((result) => {
         Swal.fire({
@@ -74,6 +76,9 @@ function MasterUploadFile({ isOpen, closeModal }) {
           icon: "error",
           confirmButtonText: "OK",
         });
+      })
+      .finally(() => {
+        setIsUploading(false);
       });
   };
 
@@ -88,6 +93,7 @@ function MasterUploadFile({ isOpen, closeModal }) {
   const resetForm = () => {
     setFile(null);
     setUploadProgress(0);
+    setIsUploading(false);
   };
 
   return (
@@ -203,17 +209,22 @@ function MasterUploadFile({ isOpen, closeModal }) {
 
               <div className="flex justify-center gap-4 mt-8">
                 <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
-                >
-                  Upload
-                </button>
-                <button
                   type="button"
                   className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
                   onClick={handleCancelUpload}
                 >
                   Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUploading}
+                  className={`px-4 py-2 text-white rounded-lg transition duration-200 ${
+                    isUploading
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  {isUploading ? "Uploading..." : "Upload File"}
                 </button>
               </div>
             </form>
