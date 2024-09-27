@@ -9,6 +9,8 @@ function ArticleUploadFile({ isOpen, closeModal }) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [articleType, setArticleType] = useState("");
   const [uploadInterval, setUploadInterval] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -55,6 +57,7 @@ function ArticleUploadFile({ isOpen, closeModal }) {
       });
       return;
     }
+    setIsUploading(true);
     dispatch(ArticleMasterFileUpload({ file, articleType }))
       .unwrap()
       .then((result) => {
@@ -76,6 +79,9 @@ function ArticleUploadFile({ isOpen, closeModal }) {
           icon: "error",
           confirmButtonText: "OK",
         });
+      })
+      .finally(() => {
+        setIsUploading(false);
       });
   };
 
@@ -91,6 +97,7 @@ function ArticleUploadFile({ isOpen, closeModal }) {
     setFile(null);
     setUploadProgress(0);
     setArticleType("");
+    setIsUploading(false);
   };
 
   return (
@@ -251,9 +258,14 @@ function ArticleUploadFile({ isOpen, closeModal }) {
 
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                  disabled={isUploading}
+                  className={`px-4 py-2 text-white rounded-lg transition duration-200 ${
+                    isUploading
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
                 >
-                  Upload File
+                  {isUploading ? "Uploading..." : "Upload File"}
                 </button>
               </div>
             </form>
