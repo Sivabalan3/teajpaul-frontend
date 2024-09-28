@@ -41,7 +41,7 @@ function Layout() {
             Pending Order
           </NavLink>
         </li>
-        <li>
+        {/* <li>
           <NavLink
             to="out-of-stocks"
             className={({ isActive }) =>
@@ -52,9 +52,9 @@ function Layout() {
               }`
             }
           >
-            Out of Stocks
+           EAN Not Matching
           </NavLink>
-        </li>
+        </li> */}
         <li>
           <NavLink
             to="mis-match"
@@ -66,7 +66,7 @@ function Layout() {
               }`
             }
           >
-            MisMatch Value
+            Price Not Matching
           </NavLink>
         </li>
       </ul>

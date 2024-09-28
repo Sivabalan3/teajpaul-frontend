@@ -8,7 +8,7 @@ import {
   batchFetchExcelData,
   DeleteBatchExcelFile,
 } from "../store/batchexcelfile/batchExcelFileSlice";
-import BatchUploadFile from "./BatchUploadFile";
+import BatchUploadFile from "./BatchuploadFile";
 
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";

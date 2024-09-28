@@ -4,7 +4,7 @@ import { batchExcelReducer } from "./batchexcelfile/batchExcelFileSlice";
 import { CustomerOrderReducer } from "./customerOrder/customerOrderSlice";
 import {articleMasterReducer} from './Articlemaster/ArticlemasterSlice';
 import { QutationSlice } from "./Qutationfile/QutationSlice";
-import {authReducer} from "./auth/AuthSlice"
+import {authReducer} from "./Authendication/AuthSlice"
 
 export const store=configureStore({
     reducer:{ 
