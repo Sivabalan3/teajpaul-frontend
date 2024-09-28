@@ -144,7 +144,7 @@ function ArticleUploadFile({ isOpen, closeModal }) {
               >
                 <option value="">Choose an Article</option>
                 <option value="D-mart">D-mart</option>
-                <option value="Spaar">Spaar</option>
+                <option value="Spaar">Option B</option>
                 <option value="C">Option C</option>
                 <option value="D">Option D</option>
               </select>

@@ -11,22 +11,35 @@ import ArticleMasterIndex from "./Articlemastercomponent/ArticleMasterIndex";
 import MismatchTable from "./OrderFile/MismatchTable";
 import QuotationIndex from "./Quotation/QuotationIndex";
 import { Login } from "./Auth/Login";
+import ProtectedRoute from "./protected/ProtectedRoute";
 
 function App() {
+  const user = JSON.parse(localStorage.getItem("user"));
   return (
     <Router>
+      {!user ?  null:<Navabr /> }
       <Routes>
-        <Route path="/" element={<Login />} /> 
-        
-        <Route path="/home" element={<><Navabr /><ArticleMasterIndex /></>} />
-        <Route path="/item-master" element={<><Navabr /><Home /></>} />
-        <Route path="/batch" element={<><Navabr /><BatchExcelTable /></>} />
-        <Route path="/qutation" element={<><Navabr /><QuotationIndex /></>} />
-        <Route path="/customer-order" element={<><Navabr /><Layout /></>}>
+        <Route path="/" element={<Login />} />
+
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              {/* <Layout /> */}
+            </ProtectedRoute>
+          }
+        >
+          <Route path="home" element={<ArticleMasterIndex />} />
+          <Route path="item-master" element={<Home />} />
+          <Route path="batch" element={<BatchExcelTable />} />
+          <Route path="qutation" element={<QuotationIndex />} />
+          <Route path="customer-order" element={<CustomerArticleTable />} />
+          <Route path="/customer-order" element={<Layout />}>
           <Route path="" index="1" element={<CustomerArticleTable />} />
           <Route path="out-of-stocks" element={<OutOfStocksCustomerorder />} />
           <Route path="pending-order" element={<OrderPendingTable />} />
           <Route path="mis-match" element={<MismatchTable />} />
+        </Route>
         </Route>
       </Routes>
     </Router>

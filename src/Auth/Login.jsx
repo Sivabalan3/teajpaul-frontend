@@ -1,28 +1,43 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { Base_Url } from "../Api";
+// Login.jsx
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginAction } from "../store/Authendication/AuthSlice";
+import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+
+  const { data, loading, error } = useSelector((state) => state.auth.Login);
 
   // Handle input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target; 
+    const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(`${Base_Url}/api/auth/login`, formData);
-      localStorage.setItem("user", JSON.stringify(response.data.user));  // Store user in localStorage
-      window.location.href = "/home";  // Redirect after successful login
-    } catch (err) {
-      setError("Invalid credentials, please try again.");
-    }
+    dispatch(loginAction({ formData }));
   };
+
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      navigate("/home");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (data) {
+      localStorage.setItem("user", JSON.stringify(data.user)); // Store user in localStorage
+      navigate("/home"); // Redirect after successful login
+    }
+  }, [data, navigate]);
 
   return (
     <div className="font-[sans-serif]">
@@ -38,7 +53,7 @@ export const Login = () => {
                 <label className="text-gray-800 text-sm mb-2 block">Email</label>
                 <div className="relative flex items-center">
                   <input
-                    name="email"  
+                    name="email"
                     type="email"
                     value={formData.email}
                     onChange={handleInputChange}
@@ -64,7 +79,7 @@ export const Login = () => {
                 <label className="text-gray-800 text-sm mb-2 block">Password</label>
                 <div className="relative flex items-center">
                   <input
-                    name="password"  // Ensure correct name "password"
+                    name="password"
                     type="password"
                     value={formData.password}
                     onChange={handleInputChange}
@@ -89,8 +104,9 @@ export const Login = () => {
                 <button
                   type="submit"
                   className="w-full shadow-xl py-3 px-4 text-sm tracking-wide rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                  disabled={loading} // Disable button while loading
                 >
-                  Log in
+                  {loading ? "Logging in..." : "Log in"}
                 </button>
               </div>
             </form>

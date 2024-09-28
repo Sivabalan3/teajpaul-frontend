@@ -12,7 +12,7 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
   const [purchaseOrderDate, setPurchaseOrderDate] = useState('');
 
   const handleExport = async () => {
-    if (!fileName || !selectedType || !purchaseOrderNumber || !purchaseOrderDate) {
+    if (!fileName  || !purchaseOrderNumber || !purchaseOrderDate) {
       Swal.fire('Error', 'Please fill all fields.', 'error');
       return;
     }
@@ -49,7 +49,7 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
             onChange={(e) => setPurchaseOrderDate(e.target.value)}
           />
         </div>
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <label className="block text-sm font-medium text-gray-600">Select Type:</label>
           <select
             className="mt-2 p-3 border border-gray-300 rounded-lg w-full transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -57,12 +57,12 @@ const ExportModal = ({ isOpen, onClose, onExport }) => {
             onChange={(e) => setSelectedType(e.target.value)}
           >
             <option value="">Select One Value</option>
-            <option value="d.Mart">d.Mart</option>
+            <option value="DMart">DMart</option>
             <option value="Spaar">Spaar</option>
             <option value="c">c</option>
             <option value="d">d</option>
           </select>
-        </div>
+        </div> */}
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-600">File Name:</label>
           <input
