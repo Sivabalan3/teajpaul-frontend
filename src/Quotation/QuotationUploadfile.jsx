@@ -7,7 +7,7 @@ function QuotationUploadfile({ isOpen, closeModal }) {
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [QutationType, setQutationType] = useState("");
+  const [QutationType, setQutationType] = useState("D-martqutation");
   const [uploadInterval, setUploadInterval] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -85,7 +85,7 @@ function QuotationUploadfile({ isOpen, closeModal }) {
         }).then(() => {
           closeModal();
           resetForm();
-          dispatch(fetchQutationsByType());
+          dispatch(fetchQutationsByType({QutationType}));
         });
       })
       .catch((error) => {
@@ -160,9 +160,6 @@ function QuotationUploadfile({ isOpen, closeModal }) {
               >
                 <option value="">Choose an Article</option>
                 <option value="D-martqutation">D-mart Qutation</option>
-                <option value="SPAR-qutation">Spaar Qutation</option>
-                <option value="C">Option C</option>
-                <option value="D">Option D</option>
               </select>
 
               <div
