@@ -3,12 +3,15 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { loginAction } from "../store/Authendication/AuthSlice";
 import { useNavigate } from "react-router-dom";
-
+import image1 from '../assets/image1.jpg'
+import image2 from '../assets/image 2.png'
+import image3 from '../assets/image 3.png'
 export const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const { data, loading, error } = useSelector((state) => state.auth.Login);
 
@@ -18,12 +21,16 @@ export const Login = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(loginAction({ formData }));
   };
-
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -80,7 +87,7 @@ export const Login = () => {
                 <div className="relative flex items-center">
                   <input
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"} // Change input type based on visibility state
                     value={formData.password}
                     onChange={handleInputChange}
                     required
@@ -88,14 +95,18 @@ export const Login = () => {
                     placeholder="Enter your password"
                   />
                   <svg
+                    onClick={togglePasswordVisibility} // Add click handler to toggle password visibility
                     xmlns="http://www.w3.org/2000/svg"
-                    fill="#bbb"
+                    fill={showPassword ? "#007BFF" : "#bbb"} // Change color based on visibility state
                     stroke="#bbb"
                     className="w-[18px] h-[18px] absolute right-4 cursor-pointer"
                     viewBox="0 0 128 128"
                   >
                     <path
-                      d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
+                      d={showPassword
+                        ? "M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
+                        : "M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z"
+                      }
                     />
                   </svg>
                 </div>
@@ -113,7 +124,7 @@ export const Login = () => {
           </div>
           <div className="lg:h-[400px] md:h-[300px] max-md:mt-8">
             <img
-              src="https://readymadeui.com/login-image.webp"
+              src={image2}
               className="w-full h-full max-md:w-4/5 mx-auto block object-cover"
               alt="Dining Experience"
             />

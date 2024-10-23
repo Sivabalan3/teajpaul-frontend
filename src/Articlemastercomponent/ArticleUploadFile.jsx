@@ -7,7 +7,7 @@ function ArticleUploadFile({ isOpen, closeModal }) {
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [articleType, setArticleType] = useState("");
+  const [articleType, setArticleType] = useState("D-mart");
   const [uploadInterval, setUploadInterval] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -69,7 +69,7 @@ function ArticleUploadFile({ isOpen, closeModal }) {
         }).then(() => {
           closeModal();
           resetForm();
-          dispatch(getArticleTypes());
+          dispatch(getArticleTypes({articleType}));
         });
       })
       .catch((error) => {

@@ -154,7 +154,7 @@ function CustomerArticleExcelUpload({ isOpen, closeModal }) {
                 onChange={handleArticleTypeChange}
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               >
-                <option value="">Choose an Article</option>
+                <option value="">Choose an order</option>
                 <option value="D-mart">D-mart</option>
                 <option value="Spaar">Spaar</option>
                 <option value="C">Option C</option>
