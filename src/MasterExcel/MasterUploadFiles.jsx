@@ -6,7 +6,7 @@ import {
 import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-function MasterUploadFile({ isOpen, closeModal }) {
+function MasterUploadFiles({ isOpen, closeModal }) {
   const dispatch = useDispatch();
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -235,4 +235,4 @@ function MasterUploadFile({ isOpen, closeModal }) {
   );
 }
 
-export default MasterUploadFile;
+export default MasterUploadFiles;
