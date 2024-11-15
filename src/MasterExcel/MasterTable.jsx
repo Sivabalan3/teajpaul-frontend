@@ -10,8 +10,7 @@ import {
   fetchExcelData,
 } from "../store/masterexcelfile/masterExcelFileSlice";
 import { useDispatch } from "react-redux";
-// import MasterUploadFile from "./Masteruploadfile";
-import MasterUploadFile from "../MasterExcel/Masteruploadfile";
+import MasterUploadFile from "./Masteruploadfile.jsx";
 const DataTable = ({ data }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditable, setIsEditable] = useState(false);
