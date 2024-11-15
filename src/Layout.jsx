@@ -41,7 +41,7 @@ function Layout() {
             Pending Order
           </NavLink>
         </li>
-        {/* <li>
+        <li>
           <NavLink
             to="out-of-stocks"
             className={({ isActive }) =>
@@ -54,7 +54,7 @@ function Layout() {
           >
            EAN Not Matching
           </NavLink>
-        </li> */}
+        </li>
         <li>
           <NavLink
             to="mis-match"
