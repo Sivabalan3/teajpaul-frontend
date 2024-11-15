@@ -43,7 +43,7 @@ function QuotationIndex() {
           onClick={openModal}
           className="px-5 py-2 mt-9 rounded-full text-white text-sm font-semibold tracking-wide bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition"
         >
-          Upload Article
+          Upload Central Qutation
         </button>
         <div className="flex gap-3 py-2 items-center">
           <button
@@ -65,7 +65,7 @@ function QuotationIndex() {
             <span>Delete</span>
           </button>
         </div>
-        <select
+        {/* <select
           id="QutationType"
           value={QutationType}
           onChange={articleChange}
@@ -75,7 +75,7 @@ function QuotationIndex() {
           <option value="SPAR-qutation">Spaar</option>
           <option value="OptionC">Option C</option>
           <option value="OptionD">Option D</option>
-        </select>
+        </select> */}
       </div>
 
       <QutationUploadfile isOpen={isOpen} closeModal={closeModal} />
